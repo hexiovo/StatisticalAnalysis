@@ -1,4 +1,6 @@
-from Statistic import model_significance_search
+from ModelSearch import model_significance_search
+from Mediation import mediation_search
+from Moderation import moderation_search
 import os
 import time
 
@@ -107,3 +109,34 @@ def model_search_pipeline(
     results_summary["past_seq_times"] = past_seq_times
 
     return results_summary
+
+
+def mediation_moderation_pipeline(input_dir, x_var, y_var, exclude_cols=None, output_dir=None):
+    """
+    遍历目标文件夹下的所有 xlsx 文件，
+    对每个文件执行中介分析和调节分析，并将结果输出到指定目录。
+
+    参数：
+        input_dir : str, 输入文件夹路径
+        x_var : str, 自变量列名
+        y_var : str, 因变量列名
+        exclude_cols : list, 要排除的列名
+        output_dir : str, 输出结果文件夹
+    """
+    if output_dir is None:
+        output_dir = os.path.join(input_dir, "results")
+    os.makedirs(output_dir, exist_ok=True)
+
+    all_files = [f for f in os.listdir(input_dir) if f.endswith('.xlsx')]
+    print(f"\n📂 共找到 {len(all_files)} 个 Excel 文件，将依次进行分析。\n")
+
+    for file in all_files:
+        file_path = os.path.join(input_dir, file)
+        print(f"========== 正在处理文件：{file} ==========")
+        try:
+            mediation_search(file_path, x_var, y_var, exclude_cols, output_dir)
+            moderation_search(file_path, x_var, y_var, exclude_cols, output_dir)
+        except Exception as e:
+            print(f"❌ 文件 {file} 处理失败，错误：{e}")
+
+    print("\n✅ 全部文件已处理完成！")
