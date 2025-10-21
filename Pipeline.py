@@ -1,8 +1,9 @@
 from ModelSearch import model_significance_search
-from Mediation import mediation_search
-from Moderation import moderation_search
+from Mediation import *
+from Moderation import *
 import os
 import time
+
 
 def model_search_pipeline(
         input_dir: str,
@@ -127,16 +128,28 @@ def mediation_moderation_pipeline(input_dir, x_var, y_var, exclude_cols=None, ou
         output_dir = os.path.join(input_dir, "results")
     os.makedirs(output_dir, exist_ok=True)
 
+    if isinstance(y_var, str):
+        y_var = [y_var]
+
     all_files = [f for f in os.listdir(input_dir) if f.endswith('.xlsx')]
     print(f"\n📂 共找到 {len(all_files)} 个 Excel 文件，将依次进行分析。\n")
 
     for file in all_files:
         file_path = os.path.join(input_dir, file)
         print(f"========== 正在处理文件：{file} ==========")
-        try:
-            mediation_search(file_path, x_var, y_var, exclude_cols, output_dir)
-            moderation_search(file_path, x_var, y_var, exclude_cols, output_dir)
-        except Exception as e:
-            print(f"❌ 文件 {file} 处理失败，错误：{e}")
+        for current_y in y_var:
+            print(f"\n➡️ 当前因变量：{current_y}")
+            coutput_dir = os.path.join(output_dir, current_y)
+            try:
+                mediation_search(file_path, x_var, current_y, exclude_cols, coutput_dir)
+                moderation_search(file_path, x_var, current_y, exclude_cols, coutput_dir)
+            except Exception as e:
+                print(f"❌ 文件 {file} 中因变量 {current_y} 处理失败，错误：{e}")
+
+    #提取
+    extract_mediation(output_dir, p_threshold=0.05, summary_name="mediation_summary.xlsx")
+    extract_moderation(output_dir, p_threshold=0.05, summary_name="moderation_summary.xlsx")
 
     print("\n✅ 全部文件已处理完成！")
+
+

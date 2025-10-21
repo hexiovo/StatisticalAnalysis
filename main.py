@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     # --- Mediation & Moderation Search ---
     x_vals = "组别"
-    y_vals = "同伴观点采择倾向"
+    y_vals = ["新颖性变化","同伴观点采择倾向","适用性变化"]
     exclude_cols = ["AI拟人化","序号","姓名"]
     inputdir = r"F:\Project\AI-Group\data\Pre&1A\all\ALL"
     outputdir = r"F:\Project\AI-Group\data\Pre&1A\all\统计\中介调节"
